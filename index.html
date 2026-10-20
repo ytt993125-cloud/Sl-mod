@@ -28,9 +28,8 @@
 </div>
 </div>
 
-<div id="toast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:white;color:black;padding:10px 22px;border-radius:99px;font-weight:bold;font-size:14px;z-index:200">Link Copied! ✅</div>
+<div id="toast" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:white;color:black;padding:10px 22px;border-radius:99px;font-weight:bold;font-size:13px;z-index:200"></div>
 
-<!-- Password Window -->
 <div id="passWindow" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:101;align-items:center;justify-content:center;padding:16px">
 <div style="background:#1a1e2a;width:100%;max-width:360px;border-radius:24px;padding:24px;text-align:center;border:1px solid #333">
 <h3 style="font-weight:bold">Admin Login</h3><p style="font-size:12px;opacity:0.5;margin-top:4px">pass: 1234</p>
@@ -41,7 +40,6 @@
 </div>
 </div>
 
-<!-- Upload Window -->
 <div id="uploadWindow" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;align-items:center;justify-content:center;padding:16px">
 <div style="background:#1a1e2a;width:100%;max-width:480px;border-radius:24px;padding:22px;border:1px solid #333;max-height:90vh;overflow-y:auto">
 <div style="display:flex;justify-content:space-between"><h3 style="font-weight:bold;font-size:18px">Add New Mod</h3><button onclick="closeUpload()" style="background:#222;width:32px;height:32px;border-radius:99px"><i class="fa fa-times"></i></button></div>
@@ -59,14 +57,17 @@
 let isAdmin=false;
 let mods=JSON.parse(localStorage.getItem('sl_mods_v3')||'[]');
 let tempPhotos=[];
-const uploadBtn=document.getElementById('uploadBtn');const logo=document.getElementById('logo');
-const passWindow=document.getElementById('passWindow');const uploadWindow=document.getElementById('uploadWindow');
+const uploadBtn=document.getElementById('uploadBtn');
+const logo=document.getElementById('logo');
+const passWindow=document.getElementById('passWindow');
+const uploadWindow=document.getElementById('uploadWindow');
 
 function updateUI(){uploadBtn.style.display=isAdmin?'block':'none'}
 logo.onclick=()=>{passWindow.style.display='flex'};
 function closePass(){passWindow.style.display='none';document.getElementById('passInput').value='';document.getElementById('passErr').style.display='none'}
 function checkPass(){if(document.getElementById('passInput').value==='1234'){isAdmin=true;closePass();updateUI();uploadWindow.style.display='flex'}else{document.getElementById('passErr').style.display='block'}}
-function closeUpload(){uploadWindow.style.display='none'}uploadBtn.onclick=()=>{uploadWindow.style.display='flex'};
+function closeUpload(){uploadWindow.style.display='none'}
+uploadBtn.onclick=()=>{uploadWindow.style.display='flex'};
 
 document.getElementById('mPhotos').addEventListener('change',async e=>{
   tempPhotos=[];let pre=document.getElementById('preview');pre.innerHTML='';
@@ -88,13 +89,13 @@ function saveMod(){
   document.getElementById('mName').value='';document.getElementById('mLink').value='';document.getElementById('mSize').value='';document.getElementById('mDesc').value='';document.getElementById('preview').innerHTML='';tempPhotos=[];
 }
 
-// SHARE - අදාල post එකේ link එක copy වෙනවා
 function shareMod(id){
-  let url = window.location.origin + window.location.pathname + "?mod=" + id;
+  let url = "https://ytt993125-cloud.github.io/Sl-mod/?mod=" + id;
   navigator.clipboard.writeText(url).then(()=>{
-    let t=document.getElementById('toast');t.innerText="Link Copied! ✅ "+url; t.style.display='block';
-    setTimeout(()=>t.style.display='none',2500);
-    if(navigator.share){navigator.share({title:"SL MODS",url:url}).catch(()=>{})}
+    let t=document.getElementById('toast');
+    t.innerText="Link Copied! ✅";
+    t.style.display='block';
+    setTimeout(()=>t.style.display='none',2000);
   });
 }
 
@@ -107,11 +108,9 @@ function render(){
   let q=document.getElementById('search').value.toLowerCase();
   let grid=document.getElementById('grid');
   let focusedId = getModIdFromUrl();
-  
-  // search filter
   let filtered = mods.filter(m=>m.name.toLowerCase().includes(q));
 
-  // අදාල mod එක උඩට ගේනවා
+  // ලින්ක් එකට අදාල post එක උඩට
   if(focusedId){
     let found = filtered.find(m=>m.id==focusedId);
     if(found){
@@ -119,34 +118,27 @@ function render(){
     }
   }
 
-  if(filtered.length===0){grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;opacity:0.5;padding:60px">No Mods Yet<br><span style="font-size:12px">Logo -> pass 1234 -> Upload</span></div>`;return}
+  if(filtered.length===0){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;opacity:0.5;padding:60px">No Mods Yet<br><span style="font-size:12px">Logo -> pass 1234 -> Upload</span></div>`;
+    return
+  }
 
-  grid.innerHTML=filtered.map((m,i)=>{
-    let isFocused = (focusedId && m.id==focusedId);
-    return `<div id="mod-${m.id}" style="background:#1a1e2a;border-radius:20px;overflow:hidden;border:${isFocused?'2px solid #a78bfa':'1px solid #222'};box-shadow:${isFocused?'0 0 20px rgba(167,139,250,0.4)':''}">
+  grid.innerHTML=filtered.map(m=>{
+    return `<div style="background:#1a1e2a;border-radius:20px;overflow:hidden;border:1px solid #222">
       <div style="position:relative">
         <img src="${m.photos[0]}" style="width:100%;height:190px;object-fit:cover">
-        ${isFocused?`<span style="position:absolute;top:10px;left:10px;background:#a78bfa;color:black;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:99px">SHARED LINK</span>`:''}
-        <button onclick="shareMod(${m.id})" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);width:36px;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.2)"><i class="fa fa-share-nodes" style="color:white"></i></button>
+        <button onclick="shareMod(${m.id})" style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);width:36px;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.2)"><i class="fa-solid fa-share-nodes" style="color:white"></i></button>
       </div>
       <div style="padding:14px">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <h3 style="font-weight:bold">${m.name}</h3>
-          <button onclick="shareMod(${m.id})" title="Copy Link" style="background:#222;width:32px;height:32px;border-radius:99px"><i class="fa-solid fa-link" style="font-size:12px"></i></button>
+          <button onclick="shareMod(${m.id})" style="background:#222;width:32px;height:32px;border-radius:99px"><i class="fa-solid fa-link" style="font-size:12px"></i></button>
         </div>
         <p style="font-size:12px;opacity:0.5;margin-top:2px">${m.desc} ${m.size?'| '+m.size:''}</p>
         <a href="${m.link}" target="_blank" style="display:block;margin-top:12px;background:white;color:black;text-align:center;padding:10px;border-radius:99px;font-weight:bold;font-size:14px;text-decoration:none"><i class="fa fa-download"></i> Download</a>
       </div>
     </div>`
   }).join('');
-
-  // Auto scroll to focused
-  if(focusedId){
-    setTimeout(()=>{
-      let el=document.getElementById('mod-'+focusedId);
-      if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
-    },300);
-  }
 }
 render();
 </script>
